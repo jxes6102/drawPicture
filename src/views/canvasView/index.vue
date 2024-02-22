@@ -1,17 +1,44 @@
 <template>
     <div class="w-[100vw] h-[100vh] flex flex-wrap justify-center items-center">
-        <div class="w-[10%] h-[100%] bg-blue-300"></div>
+        <div class="w-[10%] h-[100%] bg-blue-300">
+            <div class="relative w-full h-auto p-2 flex flex-col justify-start items-center gap-[10px]">
+                <div
+                    v-for="(item, index) in modeData" :key="index"
+                    @click="changeMode(index)"
+                    class="relative w-full h-auto p-2 flex flex-col justify-center items-center">
+                    <el-icon :size="80"><component :is="item.icon"></component></el-icon>
+                    <div>{{item.font}}</div>
+                </div>
+                
+            </div>
+        </div>
         <div ref="canvasDiv" class="w-[65%] h-[100%]">
             <canvas id="canvas"></canvas>
         </div>
         <div class="relative w-[25%] h-[100%] bg-green-300 overflow-y-auto overflow-x-hidden">
             <div class="relative w-full h-auto p-2 flex flex-wrap justify-start items-start gap-[10px]">
-                <div
-                    v-for="(item, index) in backgronndImgUrl" :key="index"
-                    @click="setBackground(index)"
-                    class="w-[10vw] h-[10vw] ">
-                    <img class="w-full h-full" :src="item" alt="">
-                </div>
+                <div class="w-full text-3xl flex flex-wrap justify-center items-center">{{modeData[mode-1].font}}</div>
+                <template v-if="mode == 1">
+                    <div
+                        v-for="(item, index) in backgronndImgUrl" :key="index"
+                        @click="setBackground(index)"
+                        class="w-[10vw] h-[10vw] ">
+                        <img class="w-full h-full" :src="item" alt="">
+                    </div>
+                </template>
+                <template v-if="mode == 2">
+                    <input @change="onFileChanged($event)" type="file" id="myFile" name="filename">
+                    <div
+                        v-for="(item, index) in fileList" :key="index"
+                        class="w-auto h-auto flex flex-col justify-center items-center">
+                        <div class="w-[10vw] h-[10vw]">
+                            <img class="w-full h-full" :src="item" alt="">
+                        </div>
+                        <button @click="delFile(index)">刪除</button>
+                    </div>
+                </template>
+                
+                
             </div>
             
         </div>
@@ -42,9 +69,29 @@ const isMobile = computed(() => {
   return mobileStore.isMobile
 })
 const { width: canvasDivWidth, height: canvasDivHeight } = useElementSize(canvasDiv)
-
 let canvas = null
-
+//1背景 2圖片 3文字 4匯出
+const mode = ref(1)
+const modeData = ref(
+    [
+        {
+            icon:'Expand',
+            font:'背景'
+        },
+        {
+            icon:'Expand',
+            font:'圖片'
+        },
+        {
+            icon:'Expand',
+            font:'文字'
+        },
+        {
+            icon:'Expand',
+            font:'匯出'
+        },
+    ]
+)
 const backgronndImgUrl = ref([
     img_1,
     img_2,
@@ -57,20 +104,6 @@ const backgronndImgUrl = ref([
     img_9
 ])
 
-let movingImage
-let imgDragOffset = {
-  offsetX: 0,
-  offsetY: 0
-}
-
-const saveImg = (e) => {
-  if( e.target.tagName.toLowerCase() === 'img' ){
-    // 這邊先計算點擊圖片的何處，等滑鼠放開後要重新計算起始座標
-    imgDragOffset.offsetX = e.clientX - e.target.offsetLeft
-    imgDragOffset.offsetY = e.clientY - e.target.offsetTop
-    movingImage = e.target
-  }
-}
 
 const getImgSize = (index) => {
     // console.log('getImgSize')
@@ -107,11 +140,9 @@ const reBackground = async(index,imgData) => {
             // scaleY: (imgData.height/img.height).toFixed(2),
             left: (canvasDivWidth.value - imgData.width)/2,
             top: (canvasDivHeight.value - imgData.height)/2,
-            angle: 0,
+            // angle: 0,
             // width: imgData.width,
             // height: imgData.height,
-            // scaleX: imgData.width / canvasDivWidth.value ,
-            // scaleY: imgData.width / canvasDivWidth.value,
         })
         // oImg.scaleToWidth(imgData.width)
         oImg.scaleToHeight(imgData.height)
@@ -133,6 +164,28 @@ const setBackground = async(index) => {
         reBackground(index,res)
     })
     loading.value = false
+}
+
+const changeMode = (val) => {
+    mode.value = val+1
+}
+
+const fileList = ref([])
+const onFileChanged = async(event) => {
+    console.log('event',event.target.files[0])
+    fileList.value.push(await toBase64(event.target.files[0]))
+    console.log('fileList',fileList.value)
+}
+
+const toBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+});
+
+const delFile = (val) => {
+    fileList.value.splice(val,1)
 }
 
 onMounted(() => {
