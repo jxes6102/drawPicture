@@ -69,7 +69,7 @@
             
         </div>
     </div>
-    <div v-else>
+    <div class="w-full h-full flex flex-wrap justify-center items-center" v-else>
         不能用手機
     </div>
     
@@ -283,11 +283,10 @@ const addText = () => {
         fill: 'red',
         // fontFamily: 'helvetica',　// 字型
         fontSize: 100, // 字體大小
-        fontWeight: 'bold'　// 字體粗細
+        fontWeight: 'bold'// 字體粗細
     })
     canvas.add(text)
 }
-
 
 onMounted(() => {
 
