@@ -1,5 +1,5 @@
 <template>
-    <div class="w-[100vw] h-[100vh] flex flex-wrap justify-center items-center">
+    <div v-if="!isMobile" class="w-[100vw] h-[100vh] flex flex-wrap justify-center items-center">
         <div class="w-[10%] h-[100%] bg-blue-300">
             <div class="relative w-full h-auto p-2 flex flex-col justify-start items-center gap-[10px]">
                 <div
@@ -16,32 +16,61 @@
             <canvas id="canvas"></canvas>
         </div>
         <div class="relative w-[25%] h-[100%] bg-green-300 overflow-y-auto overflow-x-hidden">
-            <div class="relative w-full h-auto p-2 flex flex-wrap justify-start items-start gap-[10px]">
+            <div class="relative w-full h-full p-2 flex flex-col justify-start items-start gap-[10px]">
                 <div class="w-full text-3xl flex flex-wrap justify-center items-center">{{modeData[mode-1].font}}</div>
                 <template v-if="mode == 1">
-                    <div
-                        v-for="(item, index) in backgronndImgUrl" :key="index"
-                        @click="setBackground(index)"
-                        class="w-[10vw] h-[10vw] ">
-                        <img class="w-full h-full" :src="item" alt="">
+                    <div class="w-full h-full flex flex-wrap justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
+                        <div
+                            v-for="(item, index) in backgronndImgUrl" :key="index"
+                            @click="setBackground(index)"
+                            class="w-[10vw] h-[10vw] ">
+                            <img class="w-full h-full" :src="item" alt="">
+                        </div>
                     </div>
                 </template>
                 <template v-if="mode == 2">
-                    <input @change="onFileChanged($event)" type="file" id="myFile" name="filename">
-                    <div
-                        v-for="(item, index) in fileList" :key="index"
-                        class="w-auto h-auto flex flex-col justify-center items-center">
-                        <div class="w-[10vw] h-[10vw]">
-                            <img class="w-full h-full" :src="item" alt="">
+                    <div class="w-full h-[45%] p-1 flex flex-wrap justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
+                        <input class="w-full" @change="onFileChanged($event)" type="file" id="myFile" name="filename">
+                        <div
+                            v-for="(item, index) in fileList" :key="index"
+                            class="w-auto h-[50%] flex flex-col justify-center items-center ">
+                            <div
+                                @dragstart="choseImg(index)" 
+                                class="w-[10vw] h-[10vw]">
+                                <img class="w-full h-full" :src="item" alt="">
+                            </div>
+                            <button @click="delFile(index)">刪除</button>
                         </div>
-                        <button @click="delFile(index)">刪除</button>
                     </div>
+                    
+                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400">
+                        <button @click="delSelectObj()">刪除已選物件</button>
+                    </div>
+                </template>
+                <template v-if="mode == 3">
+
+                    <div class="w-full h-[45%] p-1 flex flex-wrap justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
+                        <div class="w-full h-auto flex flex-wrap justify-start items-center">
+                            <input class="w-[70%] px-1" type="text" v-model="textForm.text">
+                            <div class="w-[30%]">
+                                <button @click="addText" class="w-full">送出</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400">
+                        <button @click="delSelectObj()">刪除已選物件</button>
+                    </div>
+                    
                 </template>
                 
                 
             </div>
             
         </div>
+    </div>
+    <div v-else>
+        不能用手機
     </div>
     
 </template>
@@ -65,9 +94,17 @@ import img_9 from '@/assets/img/laugh-9.png'
 const mobileStore = useMobileStore()
 const loading = ref(false)
 const canvasDiv = ref(null)
+const textForm = ref({
+    text:''
+})
+const textActiveForm = ref({
+    text:''
+})
+
 const isMobile = computed(() => {
   return mobileStore.isMobile
 })
+
 const { width: canvasDivWidth, height: canvasDivHeight } = useElementSize(canvasDiv)
 let canvas = null
 //1背景 2圖片 3文字 4匯出
@@ -172,9 +209,9 @@ const changeMode = (val) => {
 
 const fileList = ref([])
 const onFileChanged = async(event) => {
-    console.log('event',event.target.files[0])
+    // console.log('event',event.target.files[0])
     fileList.value.push(await toBase64(event.target.files[0]))
-    console.log('fileList',fileList.value)
+    // console.log('fileList',fileList.value)
 }
 
 const toBase64 = (file) => new Promise((resolve, reject) => {
@@ -188,6 +225,70 @@ const delFile = (val) => {
     fileList.value.splice(val,1)
 }
 
+let choseFile = ''
+const choseImg = (index) => {
+    // console.log('index',index)
+    choseFile = fileList.value[index]
+}
+
+const dropImg = (e) => {
+    if(mode.value !== 2){
+        return false
+    }
+
+    let dropPosition = {
+        left:e.e.offsetX,
+        height:e.e.offsetY
+    }
+    
+    fabric.Image.fromURL(choseFile, (myImg) => {
+        let countHeight = 0
+        let countWidth = 0
+
+        if(myImg.height>myImg.width){
+            countHeight = 200
+            countWidth = parseInt((countHeight*(myImg.width/myImg.height)).toFixed())
+        }else{
+            countWidth = 200
+            countHeight = parseInt((countWidth*(myImg.height/myImg.width)).toFixed())
+        }
+
+        // console.log('myImg',myImg)
+
+        const img = myImg.set({
+            left: dropPosition.left,
+            top: dropPosition.height,
+            // width:150,
+            // height:150
+        });
+        
+        img.scaleToHeight(countHeight)
+
+        canvas.add(img).renderAll(); 
+    });
+}
+
+const delSelectObj = () => {
+    canvas.remove(canvas.getActiveObject());
+    canvas.renderAll()
+}
+
+const addText = () => {
+    console.log('addText',textForm.value.text)
+//     canvasDivHeight.value
+// canvasDivWidth.value
+    const text = new fabric.Text(textForm.value.text, {
+        left: canvasDivWidth.value/2,
+        top: canvasDivHeight.value/2,
+        fill: 'red',
+        // fontFamily: 'helvetica',　// 字型
+        fontSize: 100, // 字體大小
+        fontWeight: 'bold'　// 字體粗細
+    })
+    canvas.add(text)
+}
+
+
 onMounted(() => {
 
     canvas = new fabric.Canvas('canvas', {
@@ -199,6 +300,8 @@ onMounted(() => {
         backgroundColor: 'rgb(55,55,55)', // 背景色,
         //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
     })
+
+    canvas.on('drop', dropImg)
 
     // const rect = new fabric.Rect({
     //     width: 100,
