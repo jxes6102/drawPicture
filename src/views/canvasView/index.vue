@@ -107,6 +107,13 @@
                     </div>
                     
                 </template>
+                <template v-if="mode == 4">
+                    <div class="w-full h-full flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
+                        <button @click="exportJPG">匯出JPG</button>
+                        <button @click="exportPNG">匯出PNG</button>
+                        <button @click="exportPDF">匯出PDF</button>
+                    </div>
+                </template>
                 
             </div>
             
@@ -432,6 +439,16 @@ const changeColor = (val) => {
     if(!val){
         textForm.value.color = '#000000'
     }
+}
+
+const exportJPG = () => {
+    console.log('exportJPG')
+}
+const exportPNG = () => {
+    console.log('exportPNG')
+}
+const exportPDF = () => {
+    console.log('exportPDF')
 }
 
 onMounted(() => {
