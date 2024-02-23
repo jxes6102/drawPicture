@@ -326,7 +326,7 @@ const delSelectObj = () => {
 }
 
 const addText = () => {
-    console.log('addText',textForm.value)
+    // console.log('addText',textForm.value)
 
     const text = new fabric.Text(textForm.value.text, {
         left: canvasDivWidth.value/2,
