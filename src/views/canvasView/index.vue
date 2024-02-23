@@ -97,7 +97,7 @@
                         
                     </div>
                     
-                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[10px]">
+                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[5px]">
                         <button @click="delSelectObj">刪除已選物件</button>
                         <button @click="up">移到上一層</button>
                         <button @click="finalUp">移到最上層</button>
