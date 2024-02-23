@@ -43,8 +43,13 @@
                         </div>
                     </div>
                     
-                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400">
-                        <button @click="delSelectObj()">刪除已選物件</button>
+                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[5px]">
+                        <button @click="delSelectObj">刪除已選物件</button>
+                        <button @click="up">移到上一層</button>
+                        <button @click="finalUp">移到最上層</button>
+                        <button @click="down">移到後一層</button>
+                        <button @click="finalDown">移到最底層</button>
+                        <button @click="delAll">刪除全部</button>
                     </div>
                 </template>
                 <template v-if="mode == 3">
@@ -58,8 +63,13 @@
                         </div>
                     </div>
                     
-                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400">
-                        <button @click="delSelectObj()">刪除已選物件</button>
+                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[10px]">
+                        <button @click="delSelectObj">刪除已選物件</button>
+                        <button @click="up">移到上一層</button>
+                        <button @click="finalUp">移到最上層</button>
+                        <button @click="down">移到後一層</button>
+                        <button @click="finalDown">移到最底層</button>
+                        <button @click="delAll">刪除全部</button>
                     </div>
                     
                 </template>
@@ -69,7 +79,7 @@
             
         </div>
     </div>
-    <div class="w-full h-full flex flex-wrap justify-center items-center" v-else>
+    <div class="w-full h-full flex flex-wrap justify-center items-center text-2xl font-bold" v-else>
         不能用手機
     </div>
     
@@ -269,12 +279,23 @@ const dropImg = (e) => {
 }
 
 const delSelectObj = () => {
-    canvas.remove(canvas.getActiveObject());
-    canvas.renderAll()
+    let target = canvas.getActiveObject()
+
+    if(target){
+        canvas.remove(target);
+        canvas.renderAll()
+    }
+    
+    if(target?._objects?.length){
+        for(let item of target?._objects){
+            canvas.remove(item)
+        }
+        canvas.renderAll()
+    }
 }
 
 const addText = () => {
-    console.log('addText',textForm.value.text)
+    // console.log('addText',textForm.value.text)
 //     canvasDivHeight.value
 // canvasDivWidth.value
     const text = new fabric.Text(textForm.value.text, {
@@ -286,6 +307,46 @@ const addText = () => {
         fontWeight: 'bold'// 字體粗細
     })
     canvas.add(text)
+}
+
+const up = () => {
+    let target = canvas.getActiveObject()
+    if(target){
+        canvas.bringForward(target)
+        canvas.renderAll()
+    }
+}
+const finalUp = () => {
+    let target = canvas.getActiveObject()
+    if(target){
+        canvas.bringToFront(target)
+        canvas.renderAll()
+    }
+}
+const down = () => {
+    let target = canvas.getActiveObject()
+    if(target){
+        canvas.sendBackwards(target)
+        canvas.renderAll()
+    }
+}
+const finalDown = () => {
+    let target = canvas.getActiveObject()
+    if(target){
+        canvas.sendToBack(target)
+        canvas.renderAll()
+    }
+}
+
+const delAll = () => {
+    var target = canvas.getObjects();
+
+    if(target.length){
+        for(let item of target){
+            canvas.remove(item)
+        }
+        canvas.renderAll()
+    }
 }
 
 onMounted(() => {
