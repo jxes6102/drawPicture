@@ -54,13 +54,47 @@
                 </template>
                 <template v-if="mode == 3">
 
-                    <div class="w-full h-[45%] p-1 flex flex-wrap justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
+                    <div class="w-full h-[45%] p-1 flex flex-col justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
                         <div class="w-full h-auto flex flex-wrap justify-start items-center">
-                            <input class="w-[70%] px-1" type="text" v-model="textForm.text">
-                            <div class="w-[30%]">
-                                <button @click="addText" class="w-full">送出</button>
+                            <input class="w-full px-1" type="text" v-model="textForm.text">
+                        </div>
+                        <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
+                            <div class="px-2">大小</div>
+                            <div class="w-[70%]">
+                                <el-slider :min="50" :max="300"  v-model="textForm.size" />
                             </div>
                         </div>
+                        <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
+                            <div class="px-2">顏色</div>
+                            <el-color-picker @active-change="changeColor" v-model="textForm.color" />
+                        </div>
+                        <!-- <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
+                            <div class="px-2">大小</div>
+                            <div class="w-[70%]">
+                                <el-slider :min="100" :max="900" :step="100" v-model="textForm.fontWeight" />
+                            </div>
+                        </div> -->
+                        <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
+                            <div class="px-2">字型</div>
+                            <div class="w-[70%]">
+                                <el-select
+                                    v-model="textForm.fontFamily"
+                                    class="m-2"
+                                    placeholder=""
+                                >
+                                    <el-option
+                                        v-for="item in fontFamilyOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value"
+                                    />
+                                </el-select>
+                            </div>
+                        </div>
+                        <div class="w-full h-auto flex flex-wrap justify-start items-center">
+                            <button @click="addText" class="w-full">送出</button>
+                        </div>
+                        
                     </div>
                     
                     <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[10px]">
@@ -73,7 +107,6 @@
                     </div>
                     
                 </template>
-                
                 
             </div>
             
@@ -105,10 +138,11 @@ const mobileStore = useMobileStore()
 const loading = ref(false)
 const canvasDiv = ref(null)
 const textForm = ref({
-    text:''
-})
-const textActiveForm = ref({
-    text:''
+    text:'',
+    size:100,
+    color:'#000000',
+    fontWeight:400,
+    fontFamily:'Arial'
 })
 
 const isMobile = computed(() => {
@@ -151,7 +185,6 @@ const backgronndImgUrl = ref([
     img_9
 ])
 
-
 const getImgSize = (index) => {
     // console.log('getImgSize')
     return new Promise((resolve, reject) => {
@@ -191,7 +224,7 @@ const reBackground = async(index,imgData) => {
             // width: imgData.width,
             // height: imgData.height,
         })
-        // oImg.scaleToWidth(imgData.width)
+
         oImg.scaleToHeight(imgData.height)
      
         canvas.setBackgroundImage(oImg).renderAll()
@@ -263,8 +296,6 @@ const dropImg = (e) => {
             countHeight = parseInt((countWidth*(myImg.height/myImg.width)).toFixed())
         }
 
-        // console.log('myImg',myImg)
-
         const img = myImg.set({
             left: dropPosition.left,
             top: dropPosition.height,
@@ -295,19 +326,66 @@ const delSelectObj = () => {
 }
 
 const addText = () => {
-    // console.log('addText',textForm.value.text)
-//     canvasDivHeight.value
-// canvasDivWidth.value
+    console.log('addText',textForm.value)
+
     const text = new fabric.Text(textForm.value.text, {
         left: canvasDivWidth.value/2,
         top: canvasDivHeight.value/2,
-        fill: 'red',
-        // fontFamily: 'helvetica',　// 字型
-        fontSize: 100, // 字體大小
-        fontWeight: 'bold'// 字體粗細
+        fill: textForm.value.color,
+        fontFamily: textForm.value.fontFamily,// 字型
+        fontSize: textForm.value.size, // 字體大小
+        fontWeight: textForm.value.fontWeight,// 字體粗細
     })
     canvas.add(text)
 }
+
+const fontFamilyOptions = [
+  {
+    value: 'Arial',
+    label: 'Arial',
+  },
+  {
+    value: 'Verdana',
+    label: 'Verdana',
+  },
+  {
+    value: 'Tahoma',
+    label: 'Tahoma',
+  },
+  {
+    value: 'Trebuchet MS',
+    label: 'Trebuchet MS',
+  },
+  {
+    value: 'Times New Roman',
+    label: 'Times New Roman',
+  },
+  {
+    value: 'Georgia',
+    label: 'Georgia',
+  },
+  {
+    value: 'Garamond',
+    label: 'Garamond',
+  },
+  {
+    value: 'Courier New',
+    label: 'Courier New',
+  },
+  {
+    value: 'Brush Script MT',
+    label: 'Brush Script MT',
+  },
+]
+// Arial (sans-serif)
+// Verdana (sans-serif)
+// Tahoma (sans-serif)
+// Trebuchet MS (sans-serif)
+// Times New Roman (serif)
+// Georgia (serif)
+// Garamond (serif)
+// Courier New (monospace)
+// Brush Script MT (cursive)
 
 const up = () => {
     let target = canvas.getActiveObject()
@@ -349,6 +427,13 @@ const delAll = () => {
     }
 }
 
+const changeColor = (val) => {
+    // console.log('val',val)
+    if(!val){
+        textForm.value.color = '#000000'
+    }
+}
+
 onMounted(() => {
 
     canvas = new fabric.Canvas('canvas', {
@@ -362,19 +447,8 @@ onMounted(() => {
     })
 
     canvas.on('drop', dropImg)
-
-    // const rect = new fabric.Rect({
-    //     width: 100,
-    //     height: 100,
-    //     top: 0,
-    //     left: 0,
-    //     fill: 'red'
-    // })
-
-    // canvas.add(rect)
     
     setBackground()
-    
     
 })
 
