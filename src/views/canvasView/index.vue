@@ -12,14 +12,15 @@
                 
             </div>
         </div>
-        <div ref="canvasDiv" class="w-[65%] h-[100%]">
+        <div ref="canvasDiv" class="w-[65%] h-[100%] flex flex-wrap justify-center items-center">
             <canvas id="canvas"></canvas>
         </div>
         <div class="relative w-[25%] h-[100%] bg-green-300 overflow-y-auto overflow-x-hidden">
             <div class="relative w-full h-full p-2 flex flex-col justify-start items-start gap-[10px]">
                 <div class="w-full text-3xl flex flex-wrap justify-center items-center">{{modeData[mode-1].font}}</div>
                 <template v-if="mode == 1">
-                    <div class="w-full h-full flex flex-wrap justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
+                    <div class="w-full h-auto flex flex-wrap justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
+                        <input class="w-full" @change="onFileChangedBackground($event)" type="file" id="myFile" name="filename">
                         <div
                             v-for="(item, index) in backgronndImgUrl" :key="index"
                             @click="setBackground(index)"
@@ -30,16 +31,18 @@
                 </template>
                 <template v-if="mode == 2">
                     <div class="w-full h-[45%] p-1 flex flex-wrap justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
-                        <input class="w-full" @change="onFileChanged($event)" type="file" id="myFile" name="filename">
-                        <div
-                            v-for="(item, index) in fileList" :key="index"
-                            class="w-auto h-[50%] flex flex-col justify-center items-center ">
+                        <div class="w-auto h-auto flex flex-wrap justify-start items-start gap-[10px]">
+                            <input class="w-full" @change="onFileChangedPicture($event)" type="file" id="myFile" name="filename">
                             <div
-                                @dragstart="choseImg(index)" 
-                                class="w-[10vw] h-[10vw]">
-                                <img class="w-full h-full" :src="item" alt="">
+                                v-for="(item, index) in filePictureList" :key="index"
+                                class="w-auto h-auto flex flex-col justify-center items-center ">
+                                <div
+                                    @dragstart="choseImg(index)" 
+                                    class="w-[10vw] h-[10vw]">
+                                    <img class="w-full h-full" :src="item" alt="">
+                                </div>
+                                <button @click="delFile(index)">刪除</button>
                             </div>
-                            <button @click="delFile(index)">刪除</button>
                         </div>
                     </div>
                     
@@ -129,7 +132,7 @@
 import { useMobileStore } from '@/stores/index'
 import { fabric } from "fabric";
 import { useElementSize } from '@vueuse/core'
-import { ref,computed,onMounted } from "vue";
+import { ref,computed,onMounted,nextTick } from "vue";
 import { useRouter,useRoute } from "vue-router";
 import img_1 from '@/assets/img/laugh-1.png'
 import img_2 from '@/assets/img/laugh-2.png'
@@ -140,6 +143,7 @@ import img_6 from '@/assets/img/laugh-6.png'
 import img_7 from '@/assets/img/laugh-7.png'
 import img_8 from '@/assets/img/laugh-8.png'
 import img_9 from '@/assets/img/laugh-9.png'
+import img_10 from '@/assets/img/example-2.png'
 
 const mobileStore = useMobileStore()
 const loading = ref(false)
@@ -185,12 +189,15 @@ const backgronndImgUrl = ref([
     img_2,
     img_3,
     img_4,
-    img_5,
-    img_6,
-    img_7,
-    img_8,
-    img_9
+    img_10,
+    // img_5,
+    // img_6,
+    // img_7,
+    // img_8,
+    // img_9,
 ])
+
+// console.log('backgronndImgUrl',backgronndImgUrl.value)
 
 const getImgSize = (index) => {
     // console.log('getImgSize')
@@ -223,10 +230,12 @@ const reBackground = async(index,imgData) => {
     fabric.Image.fromURL(chose, (img) => {
 
         const oImg = img.set({
-            // scaleX: (imgData.width/img.width).toFixed(2),
-            // scaleY: (imgData.height/img.height).toFixed(2),
+            // left: 0,
+            // top: 0,
             left: (canvasDivWidth.value - imgData.width)/2,
             top: (canvasDivHeight.value - imgData.height)/2,
+            // scaleX: (imgData.width/img.width).toFixed(2),
+            // scaleY: (imgData.height/img.height).toFixed(2),
             // angle: 0,
             // width: imgData.width,
             // height: imgData.height,
@@ -242,12 +251,48 @@ const reBackground = async(index,imgData) => {
     
 }
 
+let sizeObj = {
+    backgroundWidth:0,
+    backgroundHeight:0,
+    imgWidth:0,
+    imgHeight:0,
+}
 const setBackground = async(index) => {
+
     if(loading.value){
         return false
     }
     loading.value = true
+
     await getImgSize(index).then((res)=> {
+
+        // canvas = new fabric.Canvas('canvas', {
+        //     // height: res.height, // 讓畫布同圖片大小
+        //     // width: res.width, // 讓畫布同圖片大小
+        //     isDrawingMode: false, // 設置成 true 一秒變身小畫家
+        //     hoverCursor: 'progress', // 移動時鼠標顯示
+        //     freeDrawingCursor: 'all-scroll', // 畫畫模式時鼠標模式
+        //     backgroundColor: 'rgb(99,99,99)', // 背景色,
+        //     //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
+        // })
+        // // canvas.width = res.width;
+        // // canvas.height = res.height;
+        // canvas.setWidth(res.width);
+        // canvas.setHeight(res.height);
+        // // canvas.scaleToHeight(res.height)
+
+       
+        canvas.on('drop', dropImg)
+
+        canvas.renderAll()
+
+        sizeObj.backgroundWidth = canvasDivWidth.value
+        sizeObj.backgroundHeight = canvasDivHeight.value
+        sizeObj.imgWidth = res.width
+        sizeObj.imgHeight = res.height
+
+        // console.log('sizeObj',sizeObj)
+
         reBackground(index,res)
     })
     loading.value = false
@@ -257,11 +302,18 @@ const changeMode = (val) => {
     mode.value = val+1
 }
 
-const fileList = ref([])
-const onFileChanged = async(event) => {
+const onFileChangedBackground = async(event) => {
     // console.log('event',event.target.files[0])
-    fileList.value.push(await toBase64(event.target.files[0]))
-    // console.log('fileList',fileList.value)
+    
+    backgronndImgUrl.value.push(await toBase64(event.target.files[0]))
+    // console.log('backgronndImgUrl',backgronndImgUrl.value)
+}
+
+const filePictureList = ref([])
+const onFileChangedPicture = async(event) => {
+    // console.log('event',event.target.files[0])
+    filePictureList.value.push(await toBase64(event.target.files[0]))
+    // console.log('filePictureList',filePictureList.value)
 }
 
 const toBase64 = (file) => new Promise((resolve, reject) => {
@@ -272,13 +324,13 @@ const toBase64 = (file) => new Promise((resolve, reject) => {
 });
 
 const delFile = (val) => {
-    fileList.value.splice(val,1)
+    filePictureList.value.splice(val,1)
 }
 
 let choseFile = ''
 const choseImg = (index) => {
     // console.log('index',index)
-    choseFile = fileList.value[index]
+    choseFile = filePictureList.value[index]
 }
 
 const dropImg = (e) => {
@@ -338,6 +390,8 @@ const addText = () => {
     const text = new fabric.Text(textForm.value.text, {
         left: canvasDivWidth.value/2,
         top: canvasDivHeight.value/2,
+        // left: 0,
+        // top: 0,
         fill: textForm.value.color,
         fontFamily: textForm.value.fontFamily,// 字型
         fontSize: textForm.value.size, // 字體大小
@@ -384,15 +438,6 @@ const fontFamilyOptions = [
     label: 'Brush Script MT',
   },
 ]
-// Arial (sans-serif)
-// Verdana (sans-serif)
-// Tahoma (sans-serif)
-// Trebuchet MS (sans-serif)
-// Times New Roman (serif)
-// Georgia (serif)
-// Garamond (serif)
-// Courier New (monospace)
-// Brush Script MT (cursive)
 
 const up = () => {
     let target = canvas.getActiveObject()
@@ -441,29 +486,55 @@ const changeColor = (val) => {
     }
 }
 
+const downFile = (data) => {
+    let downItem = document.createElement('a')
+    downItem.download = '測試圖片'+ Date.now()
+    downItem.href = data;
+    downItem.click()
+    
+}
 const exportJPG = () => {
     console.log('exportJPG')
+    let data = canvas.toDataURL().replace('image/png','image/jpeg')
+    downFile(data)
+    
 }
 const exportPNG = () => {
     console.log('exportPNG')
+    let data = canvas.toDataURL();
+    downFile(data)
+    
 }
 const exportPDF = () => {
     console.log('exportPDF')
+    // console.log('cut test')
+    // const clipPath = new fabric.Circle({
+    //     radius: 200,
+    //     top: 0, // 被裁切物件中心點為基準的 -200
+    //     left: 0 // 被裁切物件中心點為基準的 -200
+    // })
+
+    // // const image = new fabric.Image(imgEl, {
+    // //     clipPath // 這個 clipPath 為設定裁切的關鍵
+    // // })
+    // canvas.add(clipPath).renderAll()
+
+    // console.log('sizeObj',sizeObj)
+    // console.log('data',canvas.toJSON())
 }
 
 onMounted(() => {
-
     canvas = new fabric.Canvas('canvas', {
         height: canvasDivHeight.value, // 讓畫布同視窗大小
         width: canvasDivWidth.value, // 讓畫布同視窗大小
         isDrawingMode: false, // 設置成 true 一秒變身小畫家
         hoverCursor: 'progress', // 移動時鼠標顯示
         freeDrawingCursor: 'all-scroll', // 畫畫模式時鼠標模式
-        backgroundColor: 'rgb(55,55,55)', // 背景色,
+        backgroundColor: 'rgb(244,244,244)', // 背景色,
         //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
     })
 
-    canvas.on('drop', dropImg)
+    // canvas.on('drop', dropImg)
     
     setBackground()
     
