@@ -280,11 +280,10 @@ const setBackground = async(index) => {
         // canvas.setWidth(res.width);
         // canvas.setHeight(res.height);
         // // canvas.scaleToHeight(res.height)
+ 
+        // canvas.on('drop', dropImg)
 
-       
-        canvas.on('drop', dropImg)
-
-        canvas.renderAll()
+        // canvas.renderAll()
 
         sizeObj.backgroundWidth = canvasDivWidth.value
         sizeObj.backgroundHeight = canvasDivHeight.value
@@ -534,7 +533,7 @@ onMounted(() => {
         //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
     })
 
-    // canvas.on('drop', dropImg)
+    canvas.on('drop', dropImg)
     
     setBackground()
     
