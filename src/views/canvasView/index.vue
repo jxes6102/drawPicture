@@ -12,7 +12,7 @@
                 
             </div>
         </div>
-        <div ref="canvasDiv" class="w-[65%] h-[100%] flex flex-wrap justify-center items-center">
+        <div ref="canvasDiv" id="canvasDiv" class="w-[65%] h-[100%] flex flex-wrap justify-center items-center">
             <canvas id="canvas"></canvas>
         </div>
         <div class="relative w-[25%] h-[100%] bg-green-300 overflow-y-auto overflow-x-hidden">
@@ -196,11 +196,8 @@ const backgronndImgUrl = ref([
     // img_8,
     // img_9,
 ])
-
-// console.log('backgronndImgUrl',backgronndImgUrl.value)
-
+//設定圖片尺寸
 const getImgSize = (index) => {
-    // console.log('getImgSize')
     return new Promise((resolve, reject) => {
         let countHeight = 0
         let countWidth = 0
@@ -223,17 +220,17 @@ const getImgSize = (index) => {
         image.onerror = reject
     })
 }
-
+//渲染背景
 const reBackground = async(index,imgData) => {
     let chose = backgronndImgUrl.value[index || 0]
     
     fabric.Image.fromURL(chose, (img) => {
 
         const oImg = img.set({
-            // left: 0,
-            // top: 0,
-            left: (canvasDivWidth.value - imgData.width)/2,
-            top: (canvasDivHeight.value - imgData.height)/2,
+            left: 0,
+            top: 0,
+            // left: (canvasDivWidth.value - imgData.width)/2,
+            // top: (canvasDivHeight.value - imgData.height)/2,
             // scaleX: (imgData.width/img.width).toFixed(2),
             // scaleY: (imgData.height/img.height).toFixed(2),
             // angle: 0,
@@ -245,8 +242,6 @@ const reBackground = async(index,imgData) => {
      
         canvas.setBackgroundImage(oImg).renderAll()
 
-        // console.log('canvas',canvas)
-        // console.log('json',canvas.toJSON())
     })
     
 }
@@ -257,6 +252,7 @@ let sizeObj = {
     imgWidth:0,
     imgHeight:0,
 }
+//設定背景
 const setBackground = async(isInit,index) => {
 
     if(loading.value){
@@ -266,56 +262,49 @@ const setBackground = async(isInit,index) => {
 
     await getImgSize(index).then((res)=> {
 
-        // console.log('isInit',isInit)
-
         sizeObj.backgroundWidth = canvasDivWidth.value
         sizeObj.backgroundHeight = canvasDivHeight.value
         sizeObj.imgWidth = res.width
         sizeObj.imgHeight = res.height
 
         createCanvas(isInit)
-        // console.log('sizeObj',sizeObj)
 
         reBackground(index,res)
     })
     loading.value = false
 }
-
+//切換模式
 const changeMode = (val) => {
     mode.value = val+1
 }
-
+//從背景選單新增圖片
 const onFileChangedBackground = async(event) => {
-    // console.log('event',event.target.files[0])
-    
     backgronndImgUrl.value.push(await toBase64(event.target.files[0]))
-    // console.log('backgronndImgUrl',backgronndImgUrl.value)
 }
 
 const filePictureList = ref([])
+//從圖片選單新增圖片
 const onFileChangedPicture = async(event) => {
-    // console.log('event',event.target.files[0])
     filePictureList.value.push(await toBase64(event.target.files[0]))
-    // console.log('filePictureList',filePictureList.value)
 }
-
+//轉換檔案格式
 const toBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
 });
-
+//從圖片選單刪除圖片
 const delFile = (val) => {
     filePictureList.value.splice(val,1)
 }
 
 let choseFile = ''
+//從圖片選單選擇圖片
 const choseImg = (index) => {
-    // console.log('index',index)
     choseFile = filePictureList.value[index]
 }
-
+//拖曳事件處理
 const dropImg = (e) => {
     if(mode.value !== 2){
         return false
@@ -351,7 +340,7 @@ const dropImg = (e) => {
         canvas.add(img).renderAll(); 
     });
 }
-
+//刪除已選物件
 const delSelectObj = () => {
     let target = canvas.getActiveObject()
 
@@ -367,10 +356,8 @@ const delSelectObj = () => {
         canvas.renderAll()
     }
 }
-
+//新增文字
 const addText = () => {
-    // console.log('addText',textForm.value)
-
     const text = new fabric.Text(textForm.value.text, {
         left: canvasDivWidth.value/2,
         top: canvasDivHeight.value/2,
@@ -384,7 +371,7 @@ const addText = () => {
     })
     canvas.add(text)
 }
-
+//字體選項
 const fontFamilyOptions = [
   {
     value: 'Arial',
@@ -423,7 +410,7 @@ const fontFamilyOptions = [
     label: 'Brush Script MT',
   },
 ]
-
+//把物件往上一層
 const up = () => {
     let target = canvas.getActiveObject()
     if(target){
@@ -431,6 +418,7 @@ const up = () => {
         canvas.renderAll()
     }
 }
+//把物件移置最上層
 const finalUp = () => {
     let target = canvas.getActiveObject()
     if(target){
@@ -438,6 +426,7 @@ const finalUp = () => {
         canvas.renderAll()
     }
 }
+//把物件往下一層
 const down = () => {
     let target = canvas.getActiveObject()
     if(target){
@@ -445,6 +434,7 @@ const down = () => {
         canvas.renderAll()
     }
 }
+//把物件移置最底層
 const finalDown = () => {
     let target = canvas.getActiveObject()
     if(target){
@@ -452,7 +442,7 @@ const finalDown = () => {
         canvas.renderAll()
     }
 }
-
+//刪除畫布所有物件
 const delAll = () => {
     var target = canvas.getObjects();
 
@@ -463,14 +453,13 @@ const delAll = () => {
         canvas.renderAll()
     }
 }
-
+//文字顏色改變
 const changeColor = (val) => {
-    // console.log('val',val)
     if(!val){
         textForm.value.color = '#000000'
     }
 }
-
+//下載檔案
 const downFile = (data) => {
     let downItem = document.createElement('a')
     downItem.download = '測試圖片'+ Date.now()
@@ -478,40 +467,31 @@ const downFile = (data) => {
     downItem.click()
     
 }
+//輸出檔案
 const exportJPG = () => {
-    console.log('exportJPG')
     let data = canvas.toDataURL().replace('image/png','image/jpeg')
     downFile(data)
     
 }
+//輸出檔案
 const exportPNG = () => {
-    console.log('exportPNG')
     let data = canvas.toDataURL();
     downFile(data)
     
 }
+//輸出檔案
 const exportPDF = () => {
     console.log('exportPDF')
-    // console.log('cut test')
-    // const clipPath = new fabric.Circle({
-    //     radius: 200,
-    //     top: 0, // 被裁切物件中心點為基準的 -200
-    //     left: 0 // 被裁切物件中心點為基準的 -200
-    // })
-
-    // // const image = new fabric.Image(imgEl, {
-    // //     clipPath // 這個 clipPath 為設定裁切的關鍵
-    // // })
-    // canvas.add(clipPath).renderAll()
-
-    // console.log('sizeObj',sizeObj)
-    // console.log('data',canvas.toJSON())
 }
+//初始畫布
+const createCanvas = (isInit = false) => {
+    if(canvas){
+        recoverCanvasDom()
+    }
 
-const init = () => {
     canvas = new fabric.Canvas('canvas', {
-        height: canvasDivHeight.value, // 讓畫布同視窗大小
-        width: canvasDivWidth.value, // 讓畫布同視窗大小
+        height: sizeObj.imgHeight, // 讓畫布以圖片比例縮放
+        width: sizeObj.imgWidth, // 讓畫布以圖片比例縮放
         isDrawingMode: false, // 設置成 true 一秒變身小畫家
         hoverCursor: 'progress', // 移動時鼠標顯示
         freeDrawingCursor: 'all-scroll', // 畫畫模式時鼠標模式
@@ -522,22 +502,16 @@ const init = () => {
     canvas.on('drop', dropImg)
 }
 
-const createCanvas = (isInit = false) => {
-    canvas = null
-    console.log('sizeObj',sizeObj)
-    canvas = new fabric.Canvas('canvas', {
-        height: canvasDivHeight.value, // 讓畫布同視窗大小
-        width: canvasDivWidth.value, // 讓畫布同視窗大小
-        isDrawingMode: false, // 設置成 true 一秒變身小畫家
-        hoverCursor: 'progress', // 移動時鼠標顯示
-        freeDrawingCursor: 'all-scroll', // 畫畫模式時鼠標模式
-        backgroundColor: 'rgb(244,244,244)', // 背景色,
-        //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
-    })
+// 解決套件刪除問題
+const recoverCanvasDom = () => {
+    let canvasContainerCanvasDom = document.getElementsByClassName("canvas-container");
+    canvasContainerCanvasDom[0].remove();
 
-    if(isInit){
-        canvas.on('drop', dropImg)
-    }
+    let canvasDivDom = document.getElementById("canvasDiv");
+
+    let newCanvasDom = document.createElement('canvas');
+    newCanvasDom.id = 'canvas'
+    canvasDivDom.append(newCanvasDom);
     
 }
 
