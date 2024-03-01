@@ -47,6 +47,7 @@
                     </div>
                     
                     <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[5px]">
+                        <button @click="cancelSelect">取消選取物件</button>
                         <button @click="delSelectObj">刪除已選物件</button>
                         <button @click="up">移到上一層</button>
                         <button @click="finalUp">移到最上層</button>
@@ -101,6 +102,7 @@
                     </div>
                     
                     <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[5px]">
+                        <button @click="cancelSelect">取消選取物件</button>
                         <button @click="delSelectObj">刪除已選物件</button>
                         <button @click="up">移到上一層</button>
                         <button @click="finalUp">移到最上層</button>
@@ -144,7 +146,12 @@ import img_7 from '@/assets/img/laugh-7.png'
 import img_8 from '@/assets/img/laugh-8.png'
 import img_9 from '@/assets/img/laugh-9.png'
 import img_10 from '@/assets/img/example-2.png'
-
+/*
+mode 1背景 2圖片 3文字 4匯出
+fontFamilyOptions 字體清單
+sizeObj 尺寸細項
+textForm 文字細項
+*/
 const mobileStore = useMobileStore()
 const loading = ref(false)
 const canvasDiv = ref(null)
@@ -155,14 +162,11 @@ const textForm = ref({
     fontWeight:400,
     fontFamily:'Arial'
 })
-
 const isMobile = computed(() => {
   return mobileStore.isMobile
 })
-
 const { width: canvasDivWidth, height: canvasDivHeight } = useElementSize(canvasDiv)
 let canvas = null
-//1背景 2圖片 3文字 4匯出
 const mode = ref(1)
 const modeData = ref(
     [
@@ -196,6 +200,51 @@ const backgronndImgUrl = ref([
     // img_8,
     // img_9,
 ])
+const fontFamilyOptions = [
+    {
+        value: 'Arial',
+        label: 'Arial',
+    },
+    {
+        value: 'Verdana',
+        label: 'Verdana',
+    },
+    {
+        value: 'Tahoma',
+        label: 'Tahoma',
+    },
+    {
+        value: 'Trebuchet MS',
+        label: 'Trebuchet MS',
+    },
+    {
+        value: 'Times New Roman',
+        label: 'Times New Roman',
+    },
+    {
+        value: 'Georgia',
+        label: 'Georgia',
+    },
+    {
+        value: 'Garamond',
+        label: 'Garamond',
+    },
+    {
+        value: 'Courier New',
+        label: 'Courier New',
+    },
+    {
+        value: 'Brush Script MT',
+        label: 'Brush Script MT',
+    },
+]
+let sizeObj = {
+    backgroundWidth:0,
+    backgroundHeight:0,
+    imgWidth:0,
+    imgHeight:0,
+}
+let choseFile = ''
 //設定圖片尺寸
 const getImgSize = (index) => {
     return new Promise((resolve, reject) => {
@@ -214,6 +263,7 @@ const getImgSize = (index) => {
                 countWidth = 600
                 countHeight = parseInt((countWidth*(image.height/image.width)).toFixed())
             }
+
             resolve({width:countWidth,height:countHeight})
             
         };
@@ -244,13 +294,6 @@ const reBackground = async(index,imgData) => {
 
     })
     
-}
-
-let sizeObj = {
-    backgroundWidth:0,
-    backgroundHeight:0,
-    imgWidth:0,
-    imgHeight:0,
 }
 //設定背景
 const setBackground = async(isInit,index) => {
@@ -298,8 +341,6 @@ const toBase64 = (file) => new Promise((resolve, reject) => {
 const delFile = (val) => {
     filePictureList.value.splice(val,1)
 }
-
-let choseFile = ''
 //從圖片選單選擇圖片
 const choseImg = (index) => {
     choseFile = filePictureList.value[index]
@@ -331,6 +372,7 @@ const dropImg = (e) => {
             left: dropPosition.left,
             top: dropPosition.height,
             cornerStrokeColor: "#8A2BE2",
+            borderColor:"#8A2BE2",
             // width:150,
             // height:150
         });
@@ -367,55 +409,19 @@ const addText = () => {
         fontFamily: textForm.value.fontFamily,// 字型
         fontSize: textForm.value.size, // 字體大小
         fontWeight: textForm.value.fontWeight,// 字體粗細
-        cornerStrokeColor: "#8A2BE2",
+        cornerStrokeColor: "#8A2BE2",//設定框限控制方框顏色
+        borderColor:"#8A2BE2",
     })
     canvas.add(text)
+    cancelSelect()
 }
-//字體選項
-const fontFamilyOptions = [
-  {
-    value: 'Arial',
-    label: 'Arial',
-  },
-  {
-    value: 'Verdana',
-    label: 'Verdana',
-  },
-  {
-    value: 'Tahoma',
-    label: 'Tahoma',
-  },
-  {
-    value: 'Trebuchet MS',
-    label: 'Trebuchet MS',
-  },
-  {
-    value: 'Times New Roman',
-    label: 'Times New Roman',
-  },
-  {
-    value: 'Georgia',
-    label: 'Georgia',
-  },
-  {
-    value: 'Garamond',
-    label: 'Garamond',
-  },
-  {
-    value: 'Courier New',
-    label: 'Courier New',
-  },
-  {
-    value: 'Brush Script MT',
-    label: 'Brush Script MT',
-  },
-]
 //把物件往上一層
 const up = () => {
     let target = canvas.getActiveObject()
     if(target){
         canvas.bringForward(target)
         canvas.renderAll()
+        cancelSelect()
     }
 }
 //把物件移置最上層
@@ -424,6 +430,7 @@ const finalUp = () => {
     if(target){
         canvas.bringToFront(target)
         canvas.renderAll()
+        cancelSelect()
     }
 }
 //把物件往下一層
@@ -432,6 +439,7 @@ const down = () => {
     if(target){
         canvas.sendBackwards(target)
         canvas.renderAll()
+        cancelSelect()
     }
 }
 //把物件移置最底層
@@ -440,6 +448,7 @@ const finalDown = () => {
     if(target){
         canvas.sendToBack(target)
         canvas.renderAll()
+        cancelSelect()
     }
 }
 //刪除畫布所有物件
@@ -501,7 +510,6 @@ const createCanvas = (isInit = false) => {
 
     canvas.on('drop', dropImg)
 }
-
 // 解決套件刪除問題
 const recoverCanvasDom = () => {
     let canvasContainerCanvasDom = document.getElementsByClassName("canvas-container");
@@ -513,6 +521,10 @@ const recoverCanvasDom = () => {
     newCanvasDom.id = 'canvas'
     canvasDivDom.append(newCanvasDom);
     
+}
+// 取消選取物件
+const cancelSelect = () => {
+    canvas.discardActiveObject().renderAll();
 }
 
 onMounted(() => {
