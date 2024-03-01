@@ -162,8 +162,9 @@ const textForm = ref({
     fontWeight:400,
     fontFamily:'Arial'
 })
+const filePictureList = ref([])
 const isMobile = computed(() => {
-  return mobileStore.isMobile
+    return mobileStore.isMobile
 })
 const { width: canvasDivWidth, height: canvasDivHeight } = useElementSize(canvasDiv)
 let canvas = null
@@ -324,8 +325,6 @@ const changeMode = (val) => {
 const onFileChangedBackground = async(event) => {
     backgronndImgUrl.value.push(await toBase64(event.target.files[0]))
 }
-
-const filePictureList = ref([])
 //從圖片選單新增圖片
 const onFileChangedPicture = async(event) => {
     filePictureList.value.push(await toBase64(event.target.files[0]))
@@ -401,8 +400,8 @@ const delSelectObj = () => {
 //新增文字
 const addText = () => {
     const text = new fabric.Text(textForm.value.text, {
-        left: canvasDivWidth.value/2,
-        top: canvasDivHeight.value/2,
+        left: sizeObj.imgWidth/2,
+        top: sizeObj.imgHeight/2,
         // left: 0,
         // top: 0,
         fill: textForm.value.color,
