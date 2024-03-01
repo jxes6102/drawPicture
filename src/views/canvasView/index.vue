@@ -23,7 +23,7 @@
                         <input class="w-full" @change="onFileChangedBackground($event)" type="file" id="myFile" name="filename">
                         <div
                             v-for="(item, index) in backgronndImgUrl" :key="index"
-                            @click="setBackground(index)"
+                            @click="setBackground(false,index)"
                             class="w-[10vw] h-[10vw] ">
                             <img class="w-full h-full" :src="item" alt="">
                         </div>
@@ -257,7 +257,7 @@ let sizeObj = {
     imgWidth:0,
     imgHeight:0,
 }
-const setBackground = async(index) => {
+const setBackground = async(isInit,index) => {
 
     if(loading.value){
         return false
@@ -266,30 +266,14 @@ const setBackground = async(index) => {
 
     await getImgSize(index).then((res)=> {
 
-        // canvas = new fabric.Canvas('canvas', {
-        //     // height: res.height, // 讓畫布同圖片大小
-        //     // width: res.width, // 讓畫布同圖片大小
-        //     isDrawingMode: false, // 設置成 true 一秒變身小畫家
-        //     hoverCursor: 'progress', // 移動時鼠標顯示
-        //     freeDrawingCursor: 'all-scroll', // 畫畫模式時鼠標模式
-        //     backgroundColor: 'rgb(99,99,99)', // 背景色,
-        //     //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
-        // })
-        // // canvas.width = res.width;
-        // // canvas.height = res.height;
-        // canvas.setWidth(res.width);
-        // canvas.setHeight(res.height);
-        // // canvas.scaleToHeight(res.height)
- 
-        // canvas.on('drop', dropImg)
-
-        // canvas.renderAll()
+        // console.log('isInit',isInit)
 
         sizeObj.backgroundWidth = canvasDivWidth.value
         sizeObj.backgroundHeight = canvasDivHeight.value
         sizeObj.imgWidth = res.width
         sizeObj.imgHeight = res.height
 
+        createCanvas(isInit)
         // console.log('sizeObj',sizeObj)
 
         reBackground(index,res)
@@ -357,6 +341,7 @@ const dropImg = (e) => {
         const img = myImg.set({
             left: dropPosition.left,
             top: dropPosition.height,
+            cornerStrokeColor: "#8A2BE2",
             // width:150,
             // height:150
         });
@@ -395,6 +380,7 @@ const addText = () => {
         fontFamily: textForm.value.fontFamily,// 字型
         fontSize: textForm.value.size, // 字體大小
         fontWeight: textForm.value.fontWeight,// 字體粗細
+        cornerStrokeColor: "#8A2BE2",
     })
     canvas.add(text)
 }
@@ -522,7 +508,7 @@ const exportPDF = () => {
     // console.log('data',canvas.toJSON())
 }
 
-onMounted(() => {
+const init = () => {
     canvas = new fabric.Canvas('canvas', {
         height: canvasDivHeight.value, // 讓畫布同視窗大小
         width: canvasDivWidth.value, // 讓畫布同視窗大小
@@ -534,8 +520,37 @@ onMounted(() => {
     })
 
     canvas.on('drop', dropImg)
+}
+
+const createCanvas = (isInit = false) => {
+    canvas = null
+    console.log('sizeObj',sizeObj)
+    canvas = new fabric.Canvas('canvas', {
+        height: canvasDivHeight.value, // 讓畫布同視窗大小
+        width: canvasDivWidth.value, // 讓畫布同視窗大小
+        isDrawingMode: false, // 設置成 true 一秒變身小畫家
+        hoverCursor: 'progress', // 移動時鼠標顯示
+        freeDrawingCursor: 'all-scroll', // 畫畫模式時鼠標模式
+        backgroundColor: 'rgb(244,244,244)', // 背景色,
+        //   backgroundImage: 'https://www.pakutaso.com/shared/img/thumb/neko1869IMG_9074_TP_V.jpg' // 背景圖片
+    })
+
+    if(isInit){
+        canvas.on('drop', dropImg)
+    }
     
-    setBackground()
+}
+
+onMounted(() => {
+
+    // init()
+
+    // // 變更所有物件畫出的控制項
+    // fabric.Object.prototype.drawControls = function (ctx, styleOverride) {
+    //     // 複寫他，改成什麼都不畫
+    // }
+    
+    setBackground(true)
     
 })
 
