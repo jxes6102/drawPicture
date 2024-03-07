@@ -131,6 +131,7 @@
 </template>
 
 <script setup>
+import { jsPDF } from "jspdf";
 import { useMobileStore } from '@/stores/index'
 import { fabric } from "fabric";
 import { useElementSize } from '@vueuse/core'
@@ -473,23 +474,23 @@ const downFile = (data) => {
     downItem.download = '測試圖片'+ Date.now()
     downItem.href = data;
     downItem.click()
-    
 }
 //輸出檔案
 const exportJPG = () => {
     let data = canvas.toDataURL().replace('image/png','image/jpeg')
     downFile(data)
-    
 }
 //輸出檔案
 const exportPNG = () => {
     let data = canvas.toDataURL();
     downFile(data)
-    
 }
 //輸出檔案
 const exportPDF = () => {
-    console.log('exportPDF')
+    let data = canvas.toDataURL();
+    const doc = new jsPDF('portrait','','a4');
+    doc.addImage(data, "PNG", 5, 10);
+    doc.save('測試圖片'+ Date.now() +".pdf");
 }
 //初始畫布
 const createCanvas = (isInit = false) => {
