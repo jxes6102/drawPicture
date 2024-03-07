@@ -23,7 +23,7 @@
                         <input class="w-full" @change="onFileChangedBackground($event)" type="file" id="myFile" name="filename">
                         <div
                             v-for="(item, index) in backgronndImgUrl" :key="index"
-                            @click="setBackground(false,index)"
+                            @click="setBackground(index)"
                             class="w-[10vw] h-[10vw] ">
                             <img class="w-full h-full" :src="item" alt="">
                         </div>
@@ -135,17 +135,17 @@ import { jsPDF } from "jspdf";
 import { useMobileStore } from '@/stores/index'
 import { fabric } from "fabric";
 import { useElementSize } from '@vueuse/core'
-import { ref,computed,onMounted,nextTick } from "vue";
+import { ref,computed,onMounted,watch } from "vue";
 import { useRouter,useRoute } from "vue-router";
 import img_1 from '@/assets/img/laugh-1.png'
 import img_2 from '@/assets/img/laugh-2.png'
 import img_3 from '@/assets/img/laugh-3.png'
 import img_4 from '@/assets/img/laugh-4.png'
-import img_5 from '@/assets/img/laugh-5.png'
-import img_6 from '@/assets/img/laugh-6.png'
-import img_7 from '@/assets/img/laugh-7.png'
-import img_8 from '@/assets/img/laugh-8.png'
-import img_9 from '@/assets/img/laugh-9.png'
+// import img_5 from '@/assets/img/laugh-5.png'
+// import img_6 from '@/assets/img/laugh-6.png'
+// import img_7 from '@/assets/img/laugh-7.png'
+// import img_8 from '@/assets/img/laugh-8.png'
+// import img_9 from '@/assets/img/laugh-9.png'
 import img_10 from '@/assets/img/example-2.png'
 /*
 mode 1背景 2圖片 3文字 4匯出
@@ -247,6 +247,11 @@ let sizeObj = {
     imgHeight:0,
 }
 let choseFile = ''
+watch(isMobile, (newVal, oldVal) => {
+    if(!newVal){
+        setBackground()
+    }
+})
 //設定圖片尺寸
 const getImgSize = (index) => {
     return new Promise((resolve, reject) => {
@@ -298,7 +303,7 @@ const reBackground = async(index,imgData) => {
     
 }
 //設定背景
-const setBackground = async(isInit,index) => {
+const setBackground = async(index) => {
 
     if(loading.value){
         return false
@@ -312,7 +317,7 @@ const setBackground = async(isInit,index) => {
         sizeObj.imgWidth = res.width
         sizeObj.imgHeight = res.height
 
-        createCanvas(isInit)
+        createCanvas()
 
         reBackground(index,res)
     })
@@ -453,7 +458,7 @@ const finalDown = () => {
 }
 //刪除畫布所有物件
 const delAll = () => {
-    var target = canvas.getObjects();
+    let target = canvas.getObjects();
 
     if(target.length){
         for(let item of target){
@@ -493,7 +498,7 @@ const exportPDF = () => {
     doc.save('測試圖片'+ Date.now() +".pdf");
 }
 //初始畫布
-const createCanvas = (isInit = false) => {
+const createCanvas = () => {
     if(canvas){
         recoverCanvasDom()
     }
@@ -513,14 +518,13 @@ const createCanvas = (isInit = false) => {
 // 解決套件刪除問題
 const recoverCanvasDom = () => {
     let canvasContainerCanvasDom = document.getElementsByClassName("canvas-container");
-    canvasContainerCanvasDom[0].remove();
-
-    let canvasDivDom = document.getElementById("canvasDiv");
-
-    let newCanvasDom = document.createElement('canvas');
-    newCanvasDom.id = 'canvas'
-    canvasDivDom.append(newCanvasDom);
-    
+    if(canvasContainerCanvasDom.length){
+        canvasContainerCanvasDom[0].remove();
+        let canvasDivDom = document.getElementById("canvasDiv");
+        let newCanvasDom = document.createElement('canvas');
+        newCanvasDom.id = 'canvas'
+        canvasDivDom.append(newCanvasDom);
+    }
 }
 // 取消選取物件
 const cancelSelect = () => {
@@ -536,7 +540,7 @@ onMounted(() => {
     //     // 複寫他，改成什麼都不畫
     // }
     
-    setBackground(true)
+    setBackground()
     
 })
 
