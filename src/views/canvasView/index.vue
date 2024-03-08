@@ -1,6 +1,6 @@
 <template>
     <div v-if="!isMobile" class="w-[100vw] h-[100vh] flex flex-wrap justify-center items-center">
-        <div class="w-[10%] h-[100%] bg-blue-300">
+        <div class="w-[10%] h-[100%] max-w-[120px] bg-blue-300">
             <div class="relative w-full h-auto p-2 flex flex-col justify-start items-center gap-[10px]">
                 <div
                     v-for="(item, index) in modeData" :key="index"
@@ -12,10 +12,7 @@
                 
             </div>
         </div>
-        <div ref="canvasDiv" id="canvasDiv" class="w-[65%] h-[100%] flex flex-wrap justify-center items-center">
-            <canvas id="canvas"></canvas>
-        </div>
-        <div class="relative w-[25%] h-[100%] bg-green-300 overflow-y-auto overflow-x-hidden">
+        <div class="relative w-[25%] h-[100%] max-w-[350px] bg-green-300 overflow-y-auto overflow-x-hidden">
             <div class="relative w-full h-full p-2 flex flex-col justify-start items-start gap-[10px]">
                 <div class="w-full text-3xl flex flex-wrap justify-center items-center">{{modeData[mode-1].font}}</div>
                 <template v-if="mode == 1">
@@ -24,7 +21,7 @@
                         <div
                             v-for="(item, index) in backgronndImgUrl" :key="index"
                             @click="setBackground(index)"
-                            class="w-[10vw] h-[10vw] ">
+                            class="w-[10vw] h-[10vw] max-w-[150px] max-h-[150px]">
                             <img class="w-full h-full" :src="item" alt="">
                         </div>
                     </div>
@@ -38,7 +35,7 @@
                                 class="w-auto h-auto flex flex-col justify-center items-center ">
                                 <div
                                     @dragstart="choseImg(index)" 
-                                    class="w-[10vw] h-[10vw]">
+                                    class="w-[10vw] h-[10vw] max-w-[150px] max-h-[150px]">
                                     <img class="w-full h-full" :src="item" alt="">
                                 </div>
                                 <button @click="delFile(index)">刪除</button>
@@ -122,6 +119,9 @@
                 
             </div>
             
+        </div>
+        <div ref="canvasDiv" id="canvasDiv" class="grow w-[65%] h-[100%] bg-[rgb(220,220,220,0.5)] flex flex-wrap justify-center items-center">
+            <canvas id="canvas"></canvas>
         </div>
     </div>
     <div class="w-full h-full flex flex-wrap justify-center items-center text-2xl font-bold" v-else>
@@ -583,16 +583,3 @@ onMounted(() => {
 })
 
 </script>
-
-<style scoped>
-/*
-@font-face {
-    font-family: myFirstFont;
-    src: url(/src/assets/font/GenJyuuGothic-P-Heavy.ttf);
-  }
-  
-.font-style-1 {
-    font-family: myFirstFont;
-}
-*/
-</style>

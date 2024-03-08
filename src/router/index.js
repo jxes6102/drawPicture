@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory,createWebHashHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+// import HomeView from '../views/HomeView.vue'
 import canvasView from '../views/canvasView/index.vue'
+import testView from '../views/testView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -11,9 +12,9 @@ const router = createRouter({
       component: canvasView
     },
     {
-      path: '/canvasView',
-      name: 'canvasView',
-      component: canvasView
+      path: '/test',
+      name: 'testView',
+      component: testView
     },
     // { 
     //   path: '/:pathMatch(.*)*',
