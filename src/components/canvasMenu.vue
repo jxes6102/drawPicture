@@ -106,7 +106,7 @@
                 <div class="w-full h-full flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
                     <button @click="exportJPG">匯出JPG</button>
                     <button @click="exportPNG">匯出PNG</button>
-                    <button @click="exportPDF">匯出PDF</button>
+                    <button @click="exportPDF">匯出PDF</button>           
                 </div>
             </template>
             
@@ -259,7 +259,6 @@ const addText = () => {
         fontWeight: textForm.value.fontWeight,// 字體粗細
         cornerStrokeColor: "#8A2BE2",//設定框限控制方框顏色
         borderColor:"#8A2BE2",
-        isMoving:true
     })
     canvas.value.add(text)
     cancelSelect()
