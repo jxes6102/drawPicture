@@ -127,6 +127,17 @@
     <div class="w-full h-full flex flex-wrap justify-center items-center text-2xl font-bold" v-else>
         不能用手機
     </div>
+    <Teleport to="body">
+        <dialogView v-if="dialogStatus" @close="cancel" type="auto">
+            <template v-slot:title></template>
+            <template v-slot:message>
+                <div class="h-[20vh] text-2xl text-red-700 font-bold flex flex-wrap justify-center items-center">
+                    {{errorMessage}}
+                </div> 
+            </template>
+            <template v-slot:control></template>
+        </dialogView>
+    </Teleport>
     
 </template>
 
@@ -147,6 +158,7 @@ import img_4 from '@/assets/img/laugh-4.png'
 // import img_8 from '@/assets/img/laugh-8.png'
 // import img_9 from '@/assets/img/laugh-9.png'
 import img_10 from '@/assets/img/example-2.png'
+import dialogView from "@/components/dialogView.vue";
 /*
 mode 1背景 2圖片 3文字 4匯出
 fontFamilyOptions 字體清單
@@ -247,6 +259,8 @@ let sizeObj = {
     imgHeight:0,
 }
 let choseFile = ''
+const dialogStatus = ref(false)
+const errorMessage = ref('')
 watch(isMobile, (newVal, oldVal) => {
     if(!newVal){
         setBackground()
@@ -329,11 +343,31 @@ const changeMode = (val) => {
 }
 //從背景選單新增圖片
 const onFileChangedBackground = async(event) => {
+    if(checkFileType(event.target.files[0].type)){
+        errorMessage.value = '請上傳正確圖片格式'
+        dialogStatus.value = true
+        return false
+    }
     backgronndImgUrl.value.push(await toBase64(event.target.files[0]))
 }
 //從圖片選單新增圖片
 const onFileChangedPicture = async(event) => {
+    if(checkFileType(event.target.files[0].type)){
+        errorMessage.value = '請上傳正確圖片格式'
+        dialogStatus.value = true
+        return false
+    }
     filePictureList.value.push(await toBase64(event.target.files[0]))
+}
+//檢查檔案
+const checkFileType = (type) => {
+    let checkArr = ['png','jpeg','jpg']
+    for(let item of checkArr){
+        if(type.includes(item)){
+            return false
+        }
+    }
+    return true
 }
 //轉換檔案格式
 const toBase64 = (file) => new Promise((resolve, reject) => {
@@ -530,6 +564,10 @@ const recoverCanvasDom = () => {
 const cancelSelect = () => {
     canvas.discardActiveObject().renderAll();
 }
+//關閉彈出視窗
+const cancel = () => {
+    dialogStatus.value = false
+}
 
 onMounted(() => {
 
@@ -545,3 +583,16 @@ onMounted(() => {
 })
 
 </script>
+
+<style scoped>
+/*
+@font-face {
+    font-family: myFirstFont;
+    src: url(/src/assets/font/GenJyuuGothic-P-Heavy.ttf);
+  }
+  
+.font-style-1 {
+    font-family: myFirstFont;
+}
+*/
+</style>
