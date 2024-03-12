@@ -1,125 +1,6 @@
 <template>
     <div v-if="!isMobile" class="w-[100vw] h-[100vh] flex flex-wrap justify-center items-center">
-        <div class="w-[10%] h-[100%] max-w-[120px] bg-blue-300">
-            <div class="relative w-full h-auto p-2 flex flex-col justify-start items-center gap-[10px]">
-                <div
-                    v-for="(item, index) in modeData" :key="index"
-                    @click="changeMode(index)"
-                    class="relative w-full h-auto p-2 flex flex-col justify-center items-center">
-                    <el-icon :size="80"><component :is="item.icon"></component></el-icon>
-                    <div>{{item.font}}</div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="relative w-[25%] h-[100%] max-w-[350px] bg-green-300 overflow-y-auto overflow-x-hidden">
-            <div class="relative w-full h-full p-2 flex flex-col justify-start items-start gap-[10px]">
-                <div class="w-full text-3xl flex flex-wrap justify-center items-center">{{modeData[mode-1].font}}</div>
-                <template v-if="mode == 1">
-                    <div class="w-full h-auto flex flex-wrap justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
-                        <input class="w-full" @change="onFileChangedBackground($event)" type="file" id="myFile" name="filename">
-                        <div
-                            v-for="(item, index) in backgronndImgUrl" :key="index"
-                            @click="setBackground(index)"
-                            class="w-[10vw] h-[10vw] max-w-[150px] max-h-[150px]">
-                            <img class="w-full h-full" :src="item" alt="">
-                        </div>
-                    </div>
-                </template>
-                <template v-if="mode == 2">
-                    <div class="w-full h-[45%] p-1 flex flex-wrap justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
-                        <div class="w-auto h-auto flex flex-wrap justify-start items-start gap-[10px]">
-                            <input class="w-full" @change="onFileChangedPicture($event)" type="file" id="myFile" name="filename">
-                            <div
-                                v-for="(item, index) in filePictureList" :key="index"
-                                class="w-auto h-auto flex flex-col justify-center items-center ">
-                                <div
-                                    @dragstart="choseImg(index)" 
-                                    class="w-[10vw] h-[10vw] max-w-[150px] max-h-[150px]">
-                                    <img class="w-full h-full" :src="item" alt="">
-                                </div>
-                                <button @click="delFile(index)">刪除</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[5px]">
-                        <button @click="cancelSelect">取消選取物件</button>
-                        <button @click="delSelectObj">刪除已選物件</button>
-                        <button @click="up">移到上一層</button>
-                        <button @click="finalUp">移到最上層</button>
-                        <button @click="down">移到後一層</button>
-                        <button @click="finalDown">移到最底層</button>
-                        <button @click="delAll">刪除全部</button>
-                    </div>
-                </template>
-                <template v-if="mode == 3">
-
-                    <div class="w-full h-[45%] p-1 flex flex-col justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
-                        <div class="w-full h-auto flex flex-wrap justify-start items-center">
-                            <input class="w-full px-1" type="text" v-model="textForm.text">
-                        </div>
-                        <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
-                            <div class="px-2">大小</div>
-                            <div class="w-[70%]">
-                                <el-slider :min="50" :max="300"  v-model="textForm.size" />
-                            </div>
-                        </div>
-                        <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
-                            <div class="px-2">顏色</div>
-                            <el-color-picker @active-change="changeColor" v-model="textForm.color" />
-                        </div>
-                        <!-- <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
-                            <div class="px-2">大小</div>
-                            <div class="w-[70%]">
-                                <el-slider :min="100" :max="900" :step="100" v-model="textForm.fontWeight" />
-                            </div>
-                        </div> -->
-                        <div class="w-full h-auto px-2 flex flex-wrap justify-start items-center">
-                            <div class="px-2">字型</div>
-                            <div class="w-[70%]">
-                                <el-select
-                                    v-model="textForm.fontFamily"
-                                    class="m-2"
-                                    placeholder=""
-                                >
-                                    <el-option
-                                        v-for="item in fontFamilyOptions"
-                                        :key="item.value"
-                                        :label="item.label"
-                                        :value="item.value"
-                                    />
-                                </el-select>
-                            </div>
-                        </div>
-                        <div class="w-full h-auto flex flex-wrap justify-start items-center">
-                            <button @click="addText" class="w-full">送出</button>
-                        </div>
-                        
-                    </div>
-                    
-                    <div class="w-full h-[45%] flex flex-col justify-start items-center bg-orange-400 gap-[5px]">
-                        <button @click="cancelSelect">取消選取物件</button>
-                        <button @click="delSelectObj">刪除已選物件</button>
-                        <button @click="up">移到上一層</button>
-                        <button @click="finalUp">移到最上層</button>
-                        <button @click="down">移到後一層</button>
-                        <button @click="finalDown">移到最底層</button>
-                        <button @click="delAll">刪除全部</button>
-                    </div>
-                    
-                </template>
-                <template v-if="mode == 4">
-                    <div class="w-full h-full flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
-                        <button @click="exportJPG">匯出JPG</button>
-                        <button @click="exportPNG">匯出PNG</button>
-                        <button @click="exportPDF">匯出PDF</button>
-                    </div>
-                </template>
-                
-            </div>
-            
-        </div>
+        <canvasMenu />
         <div ref="canvasDiv" id="canvasDiv" class="grow w-[65%] h-[100%] bg-[rgb(220,220,220,0.5)] flex flex-wrap justify-center items-center">
             <canvas id="canvas"></canvas>
         </div>
@@ -146,8 +27,10 @@ import { jsPDF } from "jspdf";
 import { useMobileStore } from '@/stores/index'
 import { fabric } from "fabric";
 import { useElementSize } from '@vueuse/core'
-import { ref,computed,onMounted,watch } from "vue";
+import { ref,computed,onMounted,watch,provide } from "vue";
 import { useRouter,useRoute } from "vue-router";
+import dialogView from "@/components/dialogView.vue";
+import canvasMenu from "@/components/canvasMenu.vue";
 import img_1 from '@/assets/img/laugh-1.png'
 import img_2 from '@/assets/img/laugh-2.png'
 import img_3 from '@/assets/img/laugh-3.png'
@@ -158,50 +41,22 @@ import img_4 from '@/assets/img/laugh-4.png'
 // import img_8 from '@/assets/img/laugh-8.png'
 // import img_9 from '@/assets/img/laugh-9.png'
 import img_10 from '@/assets/img/example-2.png'
-import dialogView from "@/components/dialogView.vue";
 /*
 mode 1背景 2圖片 3文字 4匯出
-fontFamilyOptions 字體清單
 sizeObj 尺寸細項
-textForm 文字細項
 */
 const mobileStore = useMobileStore()
 const loading = ref(false)
 const canvasDiv = ref(null)
-const textForm = ref({
-    text:'',
-    size:100,
-    color:'#000000',
-    fontWeight:400,
-    fontFamily:'Arial'
-})
 const filePictureList = ref([])
+provide('filePictureList', filePictureList)
 const isMobile = computed(() => {
     return mobileStore.isMobile
 })
 const { width: canvasDivWidth, height: canvasDivHeight } = useElementSize(canvasDiv)
 let canvas = null
 const mode = ref(1)
-const modeData = ref(
-    [
-        {
-            icon:'Expand',
-            font:'背景'
-        },
-        {
-            icon:'Expand',
-            font:'圖片'
-        },
-        {
-            icon:'Expand',
-            font:'文字'
-        },
-        {
-            icon:'Expand',
-            font:'匯出'
-        },
-    ]
-)
+provide('mode', mode)
 const backgronndImgUrl = ref([
     img_1,
     img_2,
@@ -214,44 +69,7 @@ const backgronndImgUrl = ref([
     // img_8,
     // img_9,
 ])
-const fontFamilyOptions = [
-    {
-        value: 'Arial',
-        label: 'Arial',
-    },
-    {
-        value: 'Verdana',
-        label: 'Verdana',
-    },
-    {
-        value: 'Tahoma',
-        label: 'Tahoma',
-    },
-    {
-        value: 'Trebuchet MS',
-        label: 'Trebuchet MS',
-    },
-    {
-        value: 'Times New Roman',
-        label: 'Times New Roman',
-    },
-    {
-        value: 'Georgia',
-        label: 'Georgia',
-    },
-    {
-        value: 'Garamond',
-        label: 'Garamond',
-    },
-    {
-        value: 'Courier New',
-        label: 'Courier New',
-    },
-    {
-        value: 'Brush Script MT',
-        label: 'Brush Script MT',
-    },
-]
+provide('backgronndImgUrl',backgronndImgUrl)
 let sizeObj = {
     backgroundWidth:0,
     backgroundHeight:0,
@@ -337,10 +155,12 @@ const setBackground = async(index) => {
     })
     loading.value = false
 }
+provide('setBackground', setBackground)
 //切換模式
 const changeMode = (val) => {
     mode.value = val+1
 }
+provide('changeMode', changeMode)
 //從背景選單新增圖片
 const onFileChangedBackground = async(event) => {
     if(checkFileType(event.target.files[0].type)){
@@ -350,6 +170,7 @@ const onFileChangedBackground = async(event) => {
     }
     backgronndImgUrl.value.push(await toBase64(event.target.files[0]))
 }
+provide('onFileChangedBackground', onFileChangedBackground)
 //從圖片選單新增圖片
 const onFileChangedPicture = async(event) => {
     if(checkFileType(event.target.files[0].type)){
@@ -359,6 +180,7 @@ const onFileChangedPicture = async(event) => {
     }
     filePictureList.value.push(await toBase64(event.target.files[0]))
 }
+provide('onFileChangedPicture', onFileChangedPicture)
 //檢查檔案
 const checkFileType = (type) => {
     let checkArr = ['png','jpeg','jpg']
@@ -380,10 +202,12 @@ const toBase64 = (file) => new Promise((resolve, reject) => {
 const delFile = (val) => {
     filePictureList.value.splice(val,1)
 }
+provide('delFile', delFile)
 //從圖片選單選擇圖片
 const choseImg = (index) => {
     choseFile = filePictureList.value[index]
 }
+provide('choseImg', choseImg)
 //拖曳事件處理
 const dropImg = (e) => {
     if(mode.value !== 2){
@@ -437,23 +261,25 @@ const delSelectObj = () => {
         canvas.renderAll()
     }
 }
+provide('delSelectObj',delSelectObj)
 //新增文字
-const addText = () => {
-    const text = new fabric.Text(textForm.value.text, {
+const addText = (textObj) => {
+    const text = new fabric.Text(textObj.text, {
         left: sizeObj.imgWidth/2,
         top: sizeObj.imgHeight/2,
         // left: 0,
         // top: 0,
-        fill: textForm.value.color,
-        fontFamily: textForm.value.fontFamily,// 字型
-        fontSize: textForm.value.size, // 字體大小
-        fontWeight: textForm.value.fontWeight,// 字體粗細
+        fill: textObj.color,
+        fontFamily: textObj.fontFamily,// 字型
+        fontSize: textObj.size, // 字體大小
+        fontWeight: textObj.fontWeight,// 字體粗細
         cornerStrokeColor: "#8A2BE2",//設定框限控制方框顏色
         borderColor:"#8A2BE2",
     })
     canvas.add(text)
     cancelSelect()
 }
+provide('addText',addText)
 //把物件往上一層
 const up = () => {
     let target = canvas.getActiveObject()
@@ -463,6 +289,7 @@ const up = () => {
         cancelSelect()
     }
 }
+provide('up',up)
 //把物件移置最上層
 const finalUp = () => {
     let target = canvas.getActiveObject()
@@ -472,6 +299,7 @@ const finalUp = () => {
         cancelSelect()
     }
 }
+provide('finalUp',finalUp)
 //把物件往下一層
 const down = () => {
     let target = canvas.getActiveObject()
@@ -481,6 +309,7 @@ const down = () => {
         cancelSelect()
     }
 }
+provide('down',down)
 //把物件移置最底層
 const finalDown = () => {
     let target = canvas.getActiveObject()
@@ -490,6 +319,7 @@ const finalDown = () => {
         cancelSelect()
     }
 }
+provide('finalDown',finalDown)
 //刪除畫布所有物件
 const delAll = () => {
     let target = canvas.getObjects();
@@ -501,12 +331,7 @@ const delAll = () => {
         canvas.renderAll()
     }
 }
-//文字顏色改變
-const changeColor = (val) => {
-    if(!val){
-        textForm.value.color = '#000000'
-    }
-}
+provide('delAll',delAll)
 //下載檔案
 const downFile = (data) => {
     let downItem = document.createElement('a')
@@ -519,11 +344,13 @@ const exportJPG = () => {
     let data = canvas.toDataURL().replace('image/png','image/jpeg')
     downFile(data)
 }
+provide('exportJPG',exportJPG)
 //輸出檔案
 const exportPNG = () => {
     let data = canvas.toDataURL();
     downFile(data)
 }
+provide('exportPNG',exportPNG)
 //輸出檔案
 const exportPDF = () => {
     let data = canvas.toDataURL();
@@ -531,6 +358,7 @@ const exportPDF = () => {
     doc.addImage(data, "PNG", 5, 10);
     doc.save('測試圖片'+ Date.now() +".pdf");
 }
+provide('exportPDF',exportPDF)
 //初始畫布
 const createCanvas = () => {
     if(canvas){
@@ -564,14 +392,13 @@ const recoverCanvasDom = () => {
 const cancelSelect = () => {
     canvas.discardActiveObject().renderAll();
 }
+provide('cancelSelect',cancelSelect)
 //關閉彈出視窗
 const cancel = () => {
     dialogStatus.value = false
 }
 
 onMounted(() => {
-
-    // init()
 
     // // 變更所有物件畫出的控制項
     // fabric.Object.prototype.drawControls = function (ctx, styleOverride) {

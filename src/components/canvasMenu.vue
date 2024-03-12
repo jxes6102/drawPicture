@@ -86,7 +86,7 @@
                         </div>
                     </div>
                     <div class="w-full h-auto flex flex-wrap justify-start items-center">
-                        <button @click="addText" class="w-full">送出</button>
+                        <button @click="addText(textForm)" class="w-full">送出</button>
                     </div>
                     
                 </div>
@@ -106,7 +106,7 @@
                 <div class="w-full h-full flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
                     <button @click="exportJPG">匯出JPG</button>
                     <button @click="exportPNG">匯出PNG</button>
-                    <button @click="exportPDF">匯出PDF</button>           
+                    <button @click="exportPDF">匯出PDF</button>        
                 </div>
             </template>
             
@@ -117,22 +117,55 @@
 </template>
 
 <script setup>
-import { jsPDF } from "jspdf";
+import { ref,computed,inject } from "vue";
 import { useMobileStore } from '@/stores/index'
-import { useCanvasBaseStore } from '@/stores/canvasCtrl'
-import { fabric } from "fabric";
-import { ref,computed } from "vue";
-/*
-mode 1背景 2圖片 3文字 4匯出
-*/
+
+const mobileStore = useMobileStore()
 const isMobile = computed(() => {
     return mobileStore.isMobile
 })
-const mobileStore = useMobileStore()
-const canvasBaseStore = useCanvasBaseStore()
-const loading = computed(() => {
-    return canvasBaseStore.loading
-})
+const mode = inject('mode')
+const modeData = ref(
+    [
+        {
+            icon:'Expand',
+            font:'背景'
+        },
+        {
+            icon:'Expand',
+            font:'圖片'
+        },
+        {
+            icon:'Expand',
+            font:'文字'
+        },
+        {
+            icon:'Expand',
+            font:'匯出'
+        },
+    ]
+)
+const changeMode = inject('changeMode')
+const onFileChangedBackground = inject('onFileChangedBackground')
+const backgronndImgUrl = inject('backgronndImgUrl')
+const setBackground = inject('setBackground')
+const onFileChangedPicture = inject('onFileChangedPicture')
+const filePictureList = inject('filePictureList')
+const choseImg = inject('choseImg')
+const delFile = inject('delFile')
+const cancelSelect = inject('cancelSelect')
+const delSelectObj = inject('delSelectObj')
+const up = inject('up')
+const finalUp = inject('finalUp')
+const down = inject('down')
+const finalDown = inject('finalDown')
+const delAll = inject('delAll')
+//文字顏色改變
+const changeColor = (val) => {
+    if(!val){
+        textForm.value.color = '#000000'
+    }
+}
 const textForm = ref({
     text:'',
     size:100,
@@ -140,209 +173,47 @@ const textForm = ref({
     fontWeight:400,
     fontFamily:'Arial'
 })
-const filePictureList = computed(() => {
-    return canvasBaseStore.filePictureList
-})
-const canvas = computed(() => {
-    return canvasBaseStore.canvas
-})
-const mode = computed(() => {
-    return canvasBaseStore.mode
-})
-const modeData = computed(() => {
-    return canvasBaseStore.modeData
-})
-const backgronndImgUrl = computed(() => {
-    return canvasBaseStore.backgronndImgUrl
-})
-const fontFamilyOptions = computed(() => {
-    return canvasBaseStore.fontFamilyOptions
-})
-const sizeObj = computed(() => {
-    return canvasBaseStore.sizeObj
-})
-//設定背景
-const setBackground = async(index) => {
-
-    if(loading.value){
-        return false
-    }
-    canvasBaseStore.openLoading()
-
-    await canvasBaseStore.getImgSize(index).then((res)=> {
-        canvasBaseStore.setSizeObj({
-            backgroundWidth:0,
-            backgroundHeight:0,
-            imgWidth:res.width,
-            imgHeight:res.height,
-        })
-
-        canvasBaseStore.createCanvas()
-
-        canvasBaseStore.reBackground(index,res)
-    })
-    canvasBaseStore.closeLoading()
-}
-//切換模式
-const changeMode = (val) => {
-    canvasBaseStore.changeMode(val)
-}
-//從背景選單新增圖片
-const onFileChangedBackground = async(event) => {
-    if(checkFileType(event.target.files[0].type)){
-        canvasBaseStore.setErrorMessage('請上傳正確圖片格式')
-        canvasBaseStore.openDialogStatus()
-        return false
-    }
-    canvasBaseStore.addBackgronndImgUrl(await toBase64(event.target.files[0]))
-}
-//從圖片選單新增圖片
-const onFileChangedPicture = async(event) => {
-    if(checkFileType(event.target.files[0].type)){
-        canvasBaseStore.setErrorMessage('請上傳正確圖片格式')
-        canvasBaseStore.openDialogStatus()
-        return false
-    }
-    canvasBaseStore.addFilePictureList(await toBase64(event.target.files[0]))
-}
-//檢查檔案
-const checkFileType = (type) => {
-    let checkArr = ['png','jpeg','jpg']
-    for(let item of checkArr){
-        if(type.includes(item)){
-            return false
-        }
-    }
-    return true
-}
-//轉換檔案格式
-const toBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-});
-//從圖片選單刪除圖片
-const delFile = (val) => {
-    canvasBaseStore.delFilePictureList(val)
-}
-//從圖片選單選擇圖片
-const choseImg = (index) => {
-    canvasBaseStore.setChoseFile(canvasBaseStore.choseFilePictureList(index))
-}
-//刪除已選物件
-const delSelectObj = () => {
-    let target = canvas.value.getActiveObject()
-
-    if(target){
-        canvas.value.remove(target);
-        canvas.value.renderAll()
-    }
-    
-    if(target?._objects?.length){
-        for(let item of target?._objects){
-            canvas.value.remove(item)
-        }
-        canvas.value.renderAll()
-    }
-}
-//新增文字
-const addText = () => {
-    const text = new fabric.Text(textForm.value.text, {
-        left: sizeObj.value.imgWidth/2,
-        top: sizeObj.value.imgHeight/2,
-        // left: 0,
-        // top: 0,
-        fill: textForm.value.color,
-        fontFamily: textForm.value.fontFamily,// 字型
-        fontSize: textForm.value.size, // 字體大小
-        fontWeight: textForm.value.fontWeight,// 字體粗細
-        cornerStrokeColor: "#8A2BE2",//設定框限控制方框顏色
-        borderColor:"#8A2BE2",
-    })
-    canvas.value.add(text)
-    cancelSelect()
-}
-//把物件往上一層
-const up = () => {
-    let target = canvas.value.getActiveObject()
-    if(target){
-        canvas.value.bringForward(target)
-        canvas.value.renderAll()
-        cancelSelect()
-    }
-}
-//把物件移置最上層
-const finalUp = () => {
-    let target = canvas.value.getActiveObject()
-    if(target){
-        canvas.value.bringToFront(target)
-        canvas.value.renderAll()
-        cancelSelect()
-    }
-}
-//把物件往下一層
-const down = () => {
-    let target = canvas.value.getActiveObject()
-    if(target){
-        canvas.value.sendBackwards(target)
-        canvas.value.renderAll()
-        cancelSelect()
-    }
-}
-//把物件移置最底層
-const finalDown = () => {
-    let target = canvas.value.getActiveObject()
-    if(target){
-        canvas.value.sendToBack(target)
-        canvas.value.renderAll()
-        cancelSelect()
-    }
-}
-//刪除畫布所有物件
-const delAll = () => {
-    let target = canvas.value.getObjects();
-
-    if(target.length){
-        for(let item of target){
-            canvas.value.remove(item)
-        }
-        canvas.value.renderAll()
-    }
-}
-//文字顏色改變
-const changeColor = (val) => {
-    if(!val){
-        textForm.value.color = '#000000'
-    }
-}
-//下載檔案
-const downFile = (data) => {
-    let downItem = document.createElement('a')
-    downItem.download = '測試圖片'+ Date.now()
-    downItem.href = data;
-    downItem.click()
-}
-//輸出檔案
-const exportJPG = () => {
-    let data = canvas.value.toDataURL().replace('image/png','image/jpeg')
-    downFile(data)
-}
-//輸出檔案
-const exportPNG = () => {
-    let data = canvas.value.toDataURL();
-    downFile(data)
-}
-//輸出檔案
-const exportPDF = () => {
-    let data = canvas.value.toDataURL();
-    const doc = new jsPDF('portrait','','a4');
-    doc.addImage(data, "PNG", 5, 10);
-    doc.save('測試圖片'+ Date.now() +".pdf");
-}
-// 取消選取物件
-const cancelSelect = () => {
-    canvas.value.discardActiveObject().renderAll();
-}
+const fontFamilyOptions = [
+    {
+        value: 'Arial',
+        label: 'Arial',
+    },
+    {
+        value: 'Verdana',
+        label: 'Verdana',
+    },
+    {
+        value: 'Tahoma',
+        label: 'Tahoma',
+    },
+    {
+        value: 'Trebuchet MS',
+        label: 'Trebuchet MS',
+    },
+    {
+        value: 'Times New Roman',
+        label: 'Times New Roman',
+    },
+    {
+        value: 'Georgia',
+        label: 'Georgia',
+    },
+    {
+        value: 'Garamond',
+        label: 'Garamond',
+    },
+    {
+        value: 'Courier New',
+        label: 'Courier New',
+    },
+    {
+        value: 'Brush Script MT',
+        label: 'Brush Script MT',
+    },
+]
+const addText = inject('addText')
+const exportJPG = inject('exportJPG')
+const exportPNG = inject('exportPNG')
+const exportPDF = inject('exportPDF')
 
 </script>
