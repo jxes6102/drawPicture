@@ -171,6 +171,11 @@ const onFileChangedBackground = async(event) => {
     backgronndImgUrl.value.push(await toBase64(event.target.files[0]))
 }
 provide('onFileChangedBackground', onFileChangedBackground)
+//刪除背景
+const delBackgroundFile = (val) => {
+    backgronndImgUrl.value.splice(val,1)
+}
+provide('delBackgroundFile', delBackgroundFile)
 //從圖片選單新增圖片
 const onFileChangedPicture = async(event) => {
     if(checkFileType(event.target.files[0].type)){

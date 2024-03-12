@@ -19,9 +19,13 @@
                     <input class="w-full" @change="onFileChangedBackground($event)" type="file" id="myFile" name="filename">
                     <div
                         v-for="(item, index) in backgronndImgUrl" :key="index"
-                        @click="setBackground(index)"
-                        class="w-[10vw] h-[10vw] max-w-[150px] max-h-[150px]">
-                        <img class="w-full h-full" :src="item" alt="">
+                        class="w-auto h-auto flex flex-col justify-center items-center ">
+                        <div
+                            @click="setBackground(index)" 
+                            class="w-[10vw] h-[10vw] max-w-[150px] max-h-[150px]">
+                            <img class="w-full h-full" :src="item" alt="">
+                        </div>
+                        <button @click="delBackgroundFile(index)">刪除</button>
                     </div>
                 </div>
             </template>
@@ -52,8 +56,7 @@
                     <button @click="delAll">刪除全部</button>
                 </div>
             </template>
-            <template v-if="mode == 3">
-
+            <template v-if="mode == 4">
                 <div class="w-full h-[45%] p-1 flex flex-col justify-start items-start overflow-y-auto overflow-x-hidden gap-[10px] bg-red-200">
                     <div class="w-full h-auto flex flex-wrap justify-start items-center">
                         <input class="w-full px-1" type="text" v-model="textForm.text">
@@ -100,9 +103,8 @@
                     <button @click="finalDown">移到最底層</button>
                     <button @click="delAll">刪除全部</button>
                 </div>
-                
             </template>
-            <template v-if="mode == 4">
+            <template v-if="mode == 5">
                 <div class="w-full h-full flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden gap-[10px]">
                     <button @click="exportJPG">匯出JPG</button>
                     <button @click="exportPNG">匯出PNG</button>
@@ -134,6 +136,10 @@ const modeData = ref(
         {
             icon:'Expand',
             font:'圖片'
+        },
+        {
+            icon:'Expand',
+            font:'圖形'
         },
         {
             icon:'Expand',
@@ -215,5 +221,5 @@ const addText = inject('addText')
 const exportJPG = inject('exportJPG')
 const exportPNG = inject('exportPNG')
 const exportPDF = inject('exportPDF')
-
+const delBackgroundFile = inject('delBackgroundFile')
 </script>

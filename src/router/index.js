@@ -10,10 +10,10 @@ const router = createRouter({
       name: 'home',
       component: canvasView
     },
-    // { 
-    //   path: '/:pathMatch(.*)*',
-    //   component: errorView 
-    // },
+    { 
+      path: '/:pathMatch(.*)*',
+      component: canvasView 
+    },
     // {
     //   path: '/about',
     //   name: 'about',
