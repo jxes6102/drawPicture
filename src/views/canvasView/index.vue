@@ -402,6 +402,70 @@ provide('cancelSelect',cancelSelect)
 const cancel = () => {
     dialogStatus.value = false
 }
+//新增圖形
+const addGraph = (obj) => {
+    let graphItem = null
+    if(obj.type == "Circle"){
+        graphItem = new fabric.Circle({
+            radius: obj.size,
+            fill: obj.color,
+            left: sizeObj.imgWidth/2,
+            top: sizeObj.imgHeight/2,
+            cornerStrokeColor: "#8A2BE2",
+            borderColor:"#8A2BE2",
+        })
+        
+    }else if(obj.type == "Ellipse"){
+        graphItem = new fabric.Ellipse({
+            rx: obj.width, // 必有欄位
+            ry: obj.height, // 必有欄位
+            left: sizeObj.imgWidth/2,
+            top: sizeObj.imgHeight/2,
+            fill: obj.color,
+            cornerStrokeColor: "#8A2BE2",
+            borderColor:"#8A2BE2",
+        })
+    }else if(obj.type == "Line"){
+        graphItem = new fabric.Line(
+            [
+                (sizeObj.imgWidth/2-100), (sizeObj.imgHeight/2), // 開始座標
+                (sizeObj.imgWidth/2+100), (sizeObj.imgHeight/2) // 結束座標
+            ], {
+            stroke: obj.color,
+            strokeWidth: obj.size, // 必有欄位
+            left: sizeObj.imgWidth/2,
+            top: sizeObj.imgHeight/2,
+            cornerStrokeColor: "#8A2BE2",
+            borderColor:"#8A2BE2",
+        })
+    }else if(obj.type == 'Rect'){
+        graphItem = new fabric.Rect({
+            width: obj.width, // 必有欄位
+            height: obj.height, // 必有欄位
+            left: sizeObj.imgWidth/2,
+            top: sizeObj.imgHeight/2,
+            fill: obj.color,
+            cornerStrokeColor: "#8A2BE2",
+            borderColor:"#8A2BE2",
+        })
+    }else if(obj.type == 'Triangle'){
+        graphItem = new fabric.Triangle({
+            width: obj.width, // 必有欄位
+            height: obj.height, // 必有欄位
+            left: sizeObj.imgWidth/2,
+            top: sizeObj.imgHeight/2,
+            fill: obj.color,
+            cornerStrokeColor: "#8A2BE2",
+            borderColor:"#8A2BE2",
+        })
+    }
+
+    if(graphItem){
+        canvas.add(graphItem).renderAll()
+    }
+    
+}
+provide('addGraph',addGraph)
 
 onMounted(() => {
 
